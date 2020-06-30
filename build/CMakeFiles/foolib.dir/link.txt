@@ -1,0 +1,1 @@
+/usr/bin/g++-8 -fPIC  -std=c++14 -ldl  -shared -Wl,-soname,libfoolib.so -o libfoolib.so CMakeFiles/foolib.dir/include/foo.cpp.o 

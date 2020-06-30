@@ -1,0 +1,4 @@
+/home/ali/ProjLAB/YOLO_tvm/yoloOCV/build/CMakeFiles/edit_cache.dir
+/home/ali/ProjLAB/YOLO_tvm/yoloOCV/build/CMakeFiles/rebuild_cache.dir
+/home/ali/ProjLAB/YOLO_tvm/yoloOCV/build/CMakeFiles/foolib.dir
+/home/ali/ProjLAB/YOLO_tvm/yoloOCV/build/CMakeFiles/Yolocv.dir
