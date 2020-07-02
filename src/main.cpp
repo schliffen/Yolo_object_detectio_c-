@@ -1,17 +1,18 @@
 //
 // CUDA GPU programming
 //
-#include "NumCpp.hpp"
+// #include "NumCpp.hpp"
 #include <iostream>
 #include <cstdint>
 #include <cstring>
-#include "foo.hpp"
-
+#include <fstream>
+#include "nms.hpp"
+//
 #include <opencv2/dnn.hpp>
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp> 
 #include <opencv2/imgproc.hpp>
-
+//
 // using namespace std;
 // using namespace cv;
 // using namespace dnn;
@@ -24,7 +25,8 @@ void postprocess(cv::Mat& frame, const std::vector<cv::Mat>& outs, cv::dnn::Net&
 // remove unnecessary bounding boxes
 void remove_box(cv::Mat&frame, const std::vector<cv::Mat>&out);
 //
-void drawPred(int classId, float conf, int left, int top, int right, int bottom, cv::Mat& frame);
+// void drawPred(int classId, float conf, int left, int top, int right, int bottom, cv::Mat& frame);
+void drawPred( std::vector<size_t>, std::vector<float>, std::vector<std::vector<float>>, cv::Mat&);
 // draw bounding boxes
 void draw_box(int classId, float conf, int left, int top, int right, int bottom, cv::Mat& frame);
 
@@ -32,19 +34,23 @@ void draw_box(int classId, float conf, int left, int top, int right, int bottom,
 std::vector<cv::String> getOutputsNames(const cv::dnn::Net& net);
 std::vector<std::string> classes;
  bool swapRB = false; //parser.get<bool>("rgb");
+ //
+ std::vector<std::vector<float>> nmsIndices_c;
+ const std::vector<std::vector<float>> nms_boxes;
+  
 
 // Initialize the parameters
-float confThreshold = 0.5; // Confidence threshold
-float nmsThreshold = 0.4;  // Non-maximum suppression threshold
+float confThreshold = 0.6; // Confidence threshold
+float nmsThreshold = 0.3;  // Non-maximum suppression threshold
 int inpWidth = 608;        // Width of network's input image
 int inpHeight = 608;       // Height of network's input image
 // confidence threshold
 float conf_threshold = 0.6;
 // nms threshold
-float nms = 0.4;
+float nms_threshold = 0.4;
 // backend
 int backend = 0; 
-std::string source  = "image";
+std::string source  = "video";
 
 
 int main(){
@@ -55,19 +61,18 @@ int main(){
     // nc::NdArray<double> rateMeasured = { 0.05, 0.127, 0.094, 0.2122, 0.2729, 0.2665, 0.3317 };
     // std::cout<<"array min"<<sMeasured.reshape(2,4)<<std::endl;
     //
-
     //
     // Load names of classes
     
-    std::string classesFile = "../weights/coco.names";
+    std::string classesFile = "/home/ali/ProjLAB/yoloTvm/cpp/Yolo_object_detectio_c-/weights/coco.names";
     std::ifstream ifs(classesFile.c_str());
     std::string line;
     while (getline(ifs, line)) classes.push_back(line);
 
     // Give the configuration and weight files for the model
-    std::string modelConfiguration = "/home/ali/ProjLAB/YOLO_tvm/yoloOCV/weights/yolov3.cfg";
-    std::string modelWeights = "/home/ali/ProjLAB/YOLO_tvm/yoloOCV/weights/yolov3.weights";
-    std::string imgsDir = "/home/ali/ProjLAB/plateSegmentation/MySegmentation/data/ukrayna_01";
+    std::string modelConfiguration = "/home/ali/ProjLAB/yoloTvm/cpp/Yolo_object_detectio_c-/weights/yolov3.cfg";
+    std::string modelWeights = "/home/ali/ProjLAB/yoloTvm/cpp/Yolo_object_detectio_c-/weights/yolov3.weights";
+    // std::string imgsDir = "/home/ali/ProjLAB/plateSegmentation/MySegmentation/data/ukrayna_01";
     std::vector<std::string> imgList;
     // reading the image
     cv::Mat frame, blob;
@@ -77,20 +82,23 @@ int main(){
     std::cout<< source << std::endl;
     if (source == "video"){
         
-        std::string videoPath = "../weights/video.mp4";
+        std::string videoPath = "/home/ali/ProjLAB/yoloTvm/cpp/data/test_video.mp4";
         cap.open( videoPath );
     }else if (source == "image"){
         
-        cv::glob(imgsDir + "/*.jpg" , imgList, false);
+        // cv::glob(imgsDir + "/*.jpg" , imgList, false);
         
         
     }else{
         cap.open( 0 );
     }
 
+    
 
     // loading network
     cv::dnn::Net net = cv::dnn::readNetFromDarknet(modelConfiguration, modelWeights);
+
+    
     
     // used vars
     bool process = true;
@@ -104,18 +112,22 @@ int main(){
     while (process)
     {
         // frame=cv::imread(imgList[im]);
+        
         if (source == "video"){
-        cap >> frame;
+            std::cout<< "loading the model \n";
+            cap >> frame;
         } else if (source == "image"){
+
+            
           frame = cv::imread(imgList[im]);
           im++;
         }
+        
 
         if (frame.empty())
             process = false;
 
         cv::resize(frame, frame, cv::Size(608, 608));
-
 
         preprocess( frame, net, cv::Size(608, 608), 1/155.F, cv::Scalar(0,0,0), true);
 
@@ -151,13 +163,6 @@ int main(){
     };
     cv::destroyAllWindows();
 
-    
-    
-
-
-
-
-
 
     return 0;
 }
@@ -183,7 +188,6 @@ inline void preprocess(const cv::Mat& frame, cv::dnn::Net& net, cv::Size inpSize
 }
 
 
-
 void postprocess(cv::Mat& frame, const std::vector<cv::Mat>& outs, cv::dnn::Net& net, int backend)
 {
     static std::vector<int> outLayers = net.getUnconnectedOutLayers();
@@ -194,6 +198,7 @@ void postprocess(cv::Mat& frame, const std::vector<cv::Mat>& outs, cv::dnn::Net&
     std::vector<int> classIds;
     std::vector<float> confidences;
     std::vector<cv::Rect> boxes;
+    std::vector<std::vector<float>> boxes_vect;
 
     if (outLayerType == "DetectionOutput")
     {
@@ -226,6 +231,7 @@ void postprocess(cv::Mat& frame, const std::vector<cv::Mat>& outs, cv::dnn::Net&
                     }
                     classIds.push_back((int)(data[i + 1]) - 1);  // Skip 0th background class id.
                     boxes.push_back( cv::Rect(left, top, width, height));
+                    boxes_vect.push_back({left, top, width, height});
                     confidences.push_back(confidence);
                 }
             }
@@ -275,6 +281,8 @@ void postprocess(cv::Mat& frame, const std::vector<cv::Mat>& outs, cv::dnn::Net&
                     classIds.push_back(classIdPoint.x);
                     confidences.push_back((float)confidence);
                     boxes.push_back(cv::Rect(left, top, width, height));
+                    //
+                    boxes_vect.push_back({left, top, width, height});
                 }
             }
         }
@@ -294,7 +302,7 @@ void postprocess(cv::Mat& frame, const std::vector<cv::Mat>& outs, cv::dnn::Net&
             // iterate over class ids
             if (confidences[i] >= confThreshold)
             {
-                std::cout<< i << " selected score index \n"
+                std::cout<< i << " selected score index \n";
                 class2indices[classIds[i]].push_back(i);
             }
         }
@@ -306,42 +314,183 @@ void postprocess(cv::Mat& frame, const std::vector<cv::Mat>& outs, cv::dnn::Net&
         for (std::map<int, std::vector<size_t> >::iterator it = class2indices.begin(); it != class2indices.end(); ++it)
         {
 
+            std::vector<std::vector<float>> localBoxesArray;
+            std::vector<float> outlocalConfidences;
+            std::vector<std::vector<float>> outnmsBoxes;
+            std::vector<size_t> outnmsClassIds;
+            //    
             std::vector<cv::Rect> localBoxes;
             std::vector<float> localConfidences;
             std::vector<size_t> classIndices = it->second;
 
+
             for (size_t i = 0; i < classIndices.size(); i++)
             {
-                localBoxes.push_back(boxes[classIndices[i]]);
-                localConfidences.push_back(confidences[classIndices[i]]);
+                localBoxesArray.push_back( boxes_vect[ classIndices[i] ]);
+                localBoxes.push_back( boxes[ classIndices[i] ]);
+                localConfidences.push_back(confidences[ classIndices[i] ]);
             }
             std::vector<int> nmsIndices;
 
             // non maximum suppression
             cv::dnn::NMSBoxes(localBoxes, localConfidences, confThreshold, nmsThreshold, nmsIndices);
+
+            // preparing the inputs
+
+            // std::cout<< it->first << std::endl;
+            //custom nonmax supp
+            // const int classidi = it->first;
+            const int nmsstatus = nms( localBoxesArray, confThreshold, nmsThreshold, it->first, localConfidences, outnmsClassIds, outlocalConfidences, outnmsBoxes);
+
+            // plotting the rectangle
+            if (nmsstatus)
+                drawPred( outnmsClassIds, outlocalConfidences,  outnmsBoxes, frame);
+
+
+            // std::cout<< "nms nmsboxes_c shape 0 : " << outnmsBoxes.size() << std::endl;
+            // std::cout<< "nms outLocalConfidence shape 1 : " << outlocalConfidences.size() << std::endl;
+            // for(int k=0; k<nmsIndices_c.size(); k++){
+                // std::cout<<"nms indices: "<<  nmsIndices_c[k][0] << std::endl;
+            // }
             
-            
-            for (size_t i = 0; i < nmsIndices.size(); i++)
-            {
-                size_t idx = nmsIndices[i];
-                nmsBoxes.push_back(localBoxes[idx]);
-                nmsConfidences.push_back(localConfidences[idx]);
-                nmsClassIds.push_back(it->first);
+            /*
+            std::vector<std::vector<float>>::iterator rows;
+            std::vector<float>::iterator cols; 
+
+            for (rows = outnmsBoxes.begin(); rows !=outnmsBoxes.end(); rows++){
+                for(cols=rows->begin(); cols!=rows->end(); cols++){
+                    std::cout<< *cols << std::endl;
+                
+                }
+
             }
+            */
+            
+            // for (size_t i = 0; i < nmsIndices.size(); i++)
+            // {
+                // size_t idx   = nmsIndices[i];
+
+                /*
+                std::vector<std::vector<float>>::iterator rows;
+                std::vector<float>::iterator cols; 
+
+                for (rows = nmsIndices_c.begin(); rows !=nmsIndices_c.end(); rows++){
+                    for(cols=rows->begin(); cols!=rows->end(); cols++){
+                        std::cout<< *cols << std::endl;
+                    }
+
+                }
+                */    
+                // std::cout<< "indx_C: " << nmsIndices_c[ 0 ] << std::endl;
+                // size_t idx_c = nmsIndices_c[i];
+                
+                // nms_boxes.push_back( localBoxesArray[idx_c] );
+
+                // nmsBoxes.push_back(localBoxes[idx]);
+                
+                // nmsConfidences.push_back(localConfidences[idx]);
+                // nmsClassIds.push_back(it->first);
+            // }
+
+
+
         }
-        boxes = nmsBoxes;
-        classIds = nmsClassIds;
-        confidences = nmsConfidences;
+        
+        // boxes_vect = nms_boxes;
+        // boxes = outnmsBoxes;
+        // classIds = outnmsClassIds;
+        // confidences = outlocalConfidences;
     }
 
+    
+    // for (std::vector<T>::size_type idx = 0; idx != outnmsClassIds.size(); idx++)
+    // {
+        // outnmsClassIds, outlocalConfidences, outnmsBoxes
+        // std::cout << "class id: " << outlocalConfidences[idx] << std::endl;
+        // cv::Rect box = boxes_vect[idx];
+        // drawPred(classIds[idx], confidences[idx], box.x, box.y,
+                //  box.x + box.width, box.y + box.height, frame);
+    // }
+
+    
+
+    /*
     for (size_t idx = 0; idx < boxes.size(); ++idx)
     {
         cv::Rect box = boxes[idx];
         drawPred(classIds[idx], confidences[idx], box.x, box.y,
                  box.x + box.width, box.y + box.height, frame);
     }
+    */
 }
 
+void drawPred(std::vector<size_t> outnmsClassIds, std::vector<float> outlocalConfidences, std::vector<std::vector<float>> outnmsBoxes, cv::Mat& frame)
+{
+    // writing the rectangles
+    float rectangle[4]={};
+    std::string label;
+    int baseLine;
+    cv::Size labelSize;    
+    for (std::pair<std::vector<std::vector<float>>::iterator, std::vector<float>::iterator> iter (outnmsBoxes.begin(),  outlocalConfidences.begin());
+         iter.first!=outnmsBoxes.end() && iter.second!=outlocalConfidences.end(); ++iter.first, ++iter.second){
+                    int ri = 0;
+                    for(std::vector<float>::iterator cols=iter.first->begin(); cols!=iter.first->end(); cols++){
+                        std::cout<< *cols << std::endl;
+                        rectangle[ri] =  *cols;
+                        ri++;
+                    }
+                    // writing on image
+                    cv::rectangle(frame, cv::Point(rectangle[0], rectangle[1]), cv::Point(rectangle[0] + rectangle[2], rectangle[1] + rectangle[3]), cv::Scalar(0, 255, 0));
+                    //
+                    label = cv::format("%.2d", iter.second);
+                    // label = classes[ids] + ": " + label;   
+                    labelSize = getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
+                    //    
+                    // top = cv::max(rectangle[1], labelSize.height);
+                    cv::rectangle(frame, cv::Point(rectangle[0], rectangle[1] - labelSize.height),
+                            cv::Point(rectangle[0] + labelSize.width, rectangle[1] + baseLine), cv::Scalar::all(255), cv::FILLED);
+                    cv::putText(frame, label, cv::Point(rectangle[0], rectangle[1]), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar());    
+                    
+                    // labelSize.clear();
+                    // baseLine.clear();
+
+                
+                }
+    /*
+    std::string label;
+    int baseLine;
+    cv::Size labelSize;
+    for (const float conf : outlocalConfidences){
+        label = cv::format("%.2f", conf);
+        label = classes[classId] + ": " + label;
+        
+        labelSize = getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
+        cv::putText(frame, label, cv::Point(left, top), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar());
+    }
+    */
+
+
+    // cv::rectangle(frame, cv::Point(left, top), cv::Point(right, bottom), cv::Scalar(0, 255, 0));
+
+    /*
+    std::string label = cv::format("%.2f", conf);
+    if (!classes.empty())
+    {
+        CV_Assert(classId < (int)classes.size());
+        label = classes[classId] + ": " + label;
+    }
+
+    int baseLine;
+    cv::Size labelSize = getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, &baseLine);
+
+    top = cv::max(top, labelSize.height);
+    cv::rectangle(frame, cv::Point(left, top - labelSize.height),
+              cv::Point(left + labelSize.width, top + baseLine), cv::Scalar::all(255), cv::FILLED);
+    cv::putText(frame, label, cv::Point(left, top), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar());
+    */
+}
+
+/*
 void drawPred(int classId, float conf, int left, int top, int right, int bottom, cv::Mat& frame)
 {
     cv::rectangle(frame, cv::Point(left, top), cv::Point(right, bottom), cv::Scalar(0, 255, 0));
@@ -361,6 +510,7 @@ void drawPred(int classId, float conf, int left, int top, int right, int bottom,
               cv::Point(left + labelSize.width, top + baseLine), cv::Scalar::all(255), cv::FILLED);
     cv::putText(frame, label, cv::Point(left, top), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar());
 }
+*/
 
 void callback(int pos, void*)
 {
@@ -431,7 +581,11 @@ void remove_box(cv::Mat& frame, const std::vector<cv::Mat>& outs)
     std::vector<int> indices;
 
 
-    cv::dnn::NMSBoxes(boxes, confidences, conf_threshold, nms, indices);
+    cv::dnn::NMSBoxes(boxes, confidences, conf_threshold, nms_threshold, indices);
+
+
+
+
     for (size_t i = 0; i < indices.size(); ++i)
     {
         int idx = indices[i];
