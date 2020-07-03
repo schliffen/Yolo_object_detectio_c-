@@ -1,1 +1,1 @@
-/usr/bin/c++ -fPIC  -std=c++14 -ldl  -shared -Wl,-soname,libnmslib.so -o libnmslib.so CMakeFiles/nmslib.dir/include/nms.cpp.o CMakeFiles/nmslib.dir/include/utils.cpp.o 
+/usr/bin/g++-8 -fPIC  -std=c++11 -ldl  -shared -Wl,-soname,libnmslib.so -o libnmslib.so CMakeFiles/nmslib.dir/include/nms.cpp.o CMakeFiles/nmslib.dir/include/utils.cpp.o CMakeFiles/nmslib.dir/include/yolotvm.cpp.o 

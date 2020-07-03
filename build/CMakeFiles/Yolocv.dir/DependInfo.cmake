@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/ali/ProjLAB/yoloTvm/cpp/Yolo_object_detectio_c-/src/main.cpp" "/home/ali/ProjLAB/yoloTvm/cpp/Yolo_object_detectio_c-/build/CMakeFiles/Yolocv.dir/src/main.cpp.o"
+  "/home/ali/ProjLAB/YOLO_tvm/Yolo_object_detectio_c-/src/main.cpp" "/home/ali/ProjLAB/YOLO_tvm/Yolo_object_detectio_c-/build/CMakeFiles/Yolocv.dir/src/main.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
@@ -12,15 +12,15 @@ set(CMAKE_CXX_COMPILER_ID "GNU")
 set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "../include"
   "../weights"
-  "/home/ali/installation/tvm/include"
-  "/home/ali/installation/tvm/3rdparty/dlpack/include"
-  "/home/ali/installation/tvm/3rdparty/dlmc-core/include"
-  "/home/ali/installation/opencv4/include/opencv4"
+  "/home/ali/installations/tvm/include"
+  "/home/ali/installations/tvm/3rdparty/dlpack/include"
+  "/home/ali/installations/tvm/3rdparty/dmlc-core/include"
+  "/home/ali/installations/opencv/include/opencv4"
   )
 
 # Targets to which this target links.
 set(CMAKE_TARGET_LINKED_INFO_FILES
-  "/home/ali/ProjLAB/yoloTvm/cpp/Yolo_object_detectio_c-/build/CMakeFiles/nmslib.dir/DependInfo.cmake"
+  "/home/ali/ProjLAB/YOLO_tvm/Yolo_object_detectio_c-/build/CMakeFiles/nmslib.dir/DependInfo.cmake"
   )
 
 # Fortran module output directory.

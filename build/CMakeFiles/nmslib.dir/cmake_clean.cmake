@@ -1,6 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/nmslib.dir/include/nms.cpp.o"
   "CMakeFiles/nmslib.dir/include/utils.cpp.o"
+  "CMakeFiles/nmslib.dir/include/yolotvm.cpp.o"
   "libnmslib.pdb"
   "libnmslib.so"
 )

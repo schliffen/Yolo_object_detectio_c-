@@ -1,4 +1,4 @@
-/home/ali/ProjLAB/yoloTvm/cpp/Yolo_object_detectio_c-/build/CMakeFiles/edit_cache.dir
-/home/ali/ProjLAB/yoloTvm/cpp/Yolo_object_detectio_c-/build/CMakeFiles/rebuild_cache.dir
-/home/ali/ProjLAB/yoloTvm/cpp/Yolo_object_detectio_c-/build/CMakeFiles/Yolocv.dir
-/home/ali/ProjLAB/yoloTvm/cpp/Yolo_object_detectio_c-/build/CMakeFiles/nmslib.dir
+/home/ali/ProjLAB/YOLO_tvm/Yolo_object_detectio_c-/build/CMakeFiles/edit_cache.dir
+/home/ali/ProjLAB/YOLO_tvm/Yolo_object_detectio_c-/build/CMakeFiles/rebuild_cache.dir
+/home/ali/ProjLAB/YOLO_tvm/Yolo_object_detectio_c-/build/CMakeFiles/nmslib.dir
+/home/ali/ProjLAB/YOLO_tvm/Yolo_object_detectio_c-/build/CMakeFiles/Yolocv.dir
