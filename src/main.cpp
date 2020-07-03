@@ -12,6 +12,7 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp> 
 #include <opencv2/imgproc.hpp>
+#include "yolotvm.h"
 
 // #include "tvm/runtime"
 //
@@ -35,7 +36,7 @@ void draw_box(int classId, float conf, int left, int top, int right, int bottom,
 // get output layers
 std::vector<cv::String> getOutputsNames(const cv::dnn::Net& net);
 std::vector<std::string> classes;
- bool swapRB = false; //parser.get<bool>("rgb");
+//  bool swapRB = false; //parser.get<bool>("rgb");
  //
  std::vector<std::vector<float>> nmsIndices_c;
  const std::vector<std::vector<float>> nms_boxes;
@@ -44,8 +45,8 @@ std::vector<std::string> classes;
 // Initialize the parameters
 float confThreshold = 0.6; // Confidence threshold
 float nmsThreshold = 0.3;  // Non-maximum suppression threshold
-int inpWidth = 608;        // Width of network's input image
-int inpHeight = 608;       // Height of network's input image
+int inpWidth = 416;        // Width of network's input image
+int inpHeight = 416;       // Height of network's input image
 // confidence threshold
 float conf_threshold = 0.6;
 // nms threshold
@@ -66,7 +67,7 @@ int main(){
     //
     // Load names of classes
 
-    yoloinference deployolo();
+    yoloinference deployolo;
     
     std::string classesFile = "/home/ali/ProjLAB/yoloTvm/cpp/Yolo_object_detectio_c-/weights/coco.names";
     std::ifstream ifs(classesFile.c_str());
@@ -86,7 +87,7 @@ int main(){
     std::cout<< source << std::endl;
     if (source == "video"){
         
-        std::string videoPath = "/home/ali/ProjLAB/yoloTvm/cpp/data/test_video.mp4";
+        std::string videoPath = "../../data/video_test.mp4";
         cap.open( videoPath );
     }else if (source == "image"){
         
@@ -100,7 +101,7 @@ int main(){
     
 
     // loading network
-    cv::dnn::Net net = cv::dnn::readNetFromDarknet(modelConfiguration, modelWeights);
+    // cv::dnn::Net net = cv::dnn::readNetFromDarknet(modelConfiguration, modelWeights);
 
     
     
@@ -118,7 +119,7 @@ int main(){
         // frame=cv::imread(imgList[im]);
         
         if (source == "video"){
-            std::cout<< "loading the model \n";
+            std::cout<< "reading video \n";
             cap >> frame;
         } else if (source == "image"){
 
@@ -131,10 +132,13 @@ int main(){
         if (frame.empty())
             process = false;
 
+        cv::imshow("frame", frame);
+        cv::waitKey(0);
         cv::resize(frame, frame, cv::Size(416, 416));
 
+        std::cout<< " frame resized \n";
 
-        deployolo.detector(frame);
+        deployolo.ydetector(frame);
         
         
         

@@ -9,7 +9,28 @@
 #include <stdio.h>
 #include <fstream>
 
-const std::string modelFolder= "/home/ali/ProjLAB/yoloTvm/cpp/Yolo_object_detectio_c-/fd_tvm/output/darknet/fd_light/";
+#include <opencv2/dnn.hpp>
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui.hpp> 
+#include <opencv2/imgproc.hpp>
+
+
+#include "tvm/runtime/module.h"
+#include "tvm/runtime/registry.h"
+#include "tvm/runtime/packed_func.h"
+#include "dlpack/dlpack.h"
+
+
+
+// tvm configuration!
+constexpr int dtype_code = kDLFloat;
+constexpr int dtype_bits = 32;
+constexpr int dtype_lanes = 1;
+constexpr int device_type = kDLGPU;
+constexpr int device_id = 0;
+constexpr int in_ndim = 4;
+
+const std::string modelFolder= "../fd_tvm/output/darknet/fd_light/";
 const std::string detectionMDLname = "fd_light";
 
 

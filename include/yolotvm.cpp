@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <tvm/runtime/module.h>
 #include <tvm/runtime/registry.h>
 #include <tvm/runtime/packed_func.h>
@@ -49,21 +50,28 @@ tvm::runtime::PackedFunc TVM_Inference::forward(cv::Mat tensor ) {
     };
 
 
-yoloinference::detector(cv::Mat frame){
+void yoloinference::ydetector(cv::Mat frame){
     static cv::Mat tensor;
+    std::cout<< "inference 1 \n";
     // Create a 4D blob from a frame.
-    if (inpSize.width <= 0) inpSize.width = frame.cols;
-    if (inpSize.height <= 0) inpSize.height = frame.rows;
+    // if (inpSize.width <= 0) inpSize.width = frame.cols;
+    // if (inpSize.height <= 0) inpSize.height = frame.rows;
     cv::dnn::blobFromImage(frame, tensor, scale, cv::Size(img_w, img_h), cv::Scalar(), swapRB, false);
 
-    tvm::runtime::PackedFunc tvmout = this->yolodet.forward( tensor );
+    tvm::runtime::PackedFunc tvmout = this->dethandler.forward( tensor );
 
-    std::cout<< tvmout.size() << std::endl;
+    // tvm::runtime::NDArray Y;
+    tvm::runtime::NDArray res_1 = tvmout(3);
+    // tvmout(0, Y); // this is for DLtensor
+
+    // const tvm::runtime::NDArray res = tvmout(0);
+    // std::cout<< tvmout(0)->size() << std::endl;
+    std::cout<< res_1->shape[1] <<" " << res_1->shape[2] << "  " << res_1->shape[3] << " " << res_1->shape[4] << std::endl;
 
     // int64_t out_shape[1, this->]
 
 
-
+    std::cout<< "inference pased \n";
 
 
 

@@ -2,13 +2,13 @@ cmake_minimum_required (VERSION 3.5)
 
 # Setup projectname
 project (Yolocv VERSION 1.0.0)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -ldl")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -ldl")
 # Compile and link main.cpp and foo.cpp
 
-set(TVM_HOME /home/ali/installation/tvm)
-set(OPENCV_INCLUDE_DIR /home/ali/installation/opencv4/include/opencv4)
-set(OPENCV_LIB_DIR /home/ali/installation/opencv4/lib)
-set(CMAKE_PREFIX_PATH /home/ali/installation/opencv4/lib/cmake/opencv4)
+set(TVM_HOME /home/ali/installations/tvm)
+set(OPENCV_INCLUDE_DIR /home/ali/installations/opencv/include/opencv4)
+set(OPENCV_LIB_DIR /home/ali/installations/opencv/lib)
+set(CMAKE_PREFIX_PATH /home/ali/installations/opencv/lib/cmake/opencv4)
 
 find_package( OpenCV REQUIRED )
 
@@ -19,7 +19,7 @@ include_directories( include )
 include_directories( weights )
 include_directories(${TVM_HOME}/include)
 include_directories(${TVM_HOME}/3rdparty/dlpack/include)
-include_directories(${TVM_HOME}/3rdparty/dlmc-core/include)
+include_directories(${TVM_HOME}/3rdparty/dmlc-core/include)
 
 
 add_library( nmslib
@@ -28,6 +28,9 @@ add_library( nmslib
     include/nms.hpp
     include/utils.cpp
     include/utils.hpp
+    include/yolotvm.cpp
+    include/yolotvm.h
+
 )
 
 
@@ -40,6 +43,6 @@ link_directories(${TVM_HOME}/build)
 
 add_executable( ${PROJECT_NAME} src/main.cpp )
 
-target_link_libraries(  ${PROJECT_NAME}  nmslib  ${OpenCV_LIBS}  -ltvm_runtime -lstdc++) # ${Boost_LIBRARY_DIRS}
+target_link_libraries(  ${PROJECT_NAME}  nmslib  ${OpenCV_LIBS}  -ltvm_runtime ) # ${Boost_LIBRARY_DIRS} -lstdc++
 # target_include_directories( ${PROJECT_NAME} PUBLIC ${NUMCPP_INCLUDES})
 # target_include_directories( ${PROJECT_NAME} PUBLIC ${Boost_INCLUDE_DIRS}) 
