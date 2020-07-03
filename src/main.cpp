@@ -12,6 +12,8 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp> 
 #include <opencv2/imgproc.hpp>
+
+// #include "tvm/runtime"
 //
 // using namespace std;
 // using namespace cv;
@@ -63,6 +65,8 @@ int main(){
     //
     //
     // Load names of classes
+
+    yoloinference deployolo();
     
     std::string classesFile = "/home/ali/ProjLAB/yoloTvm/cpp/Yolo_object_detectio_c-/weights/coco.names";
     std::ifstream ifs(classesFile.c_str());
@@ -127,11 +131,15 @@ int main(){
         if (frame.empty())
             process = false;
 
-        cv::resize(frame, frame, cv::Size(608, 608));
+        cv::resize(frame, frame, cv::Size(416, 416));
 
+
+        deployolo.detector(frame);
+        
+        
+        
+        /*
         preprocess( frame, net, cv::Size(608, 608), 1/155.F, cv::Scalar(0,0,0), true);
-
-
         // convert image to blob
         // cv::dnn::blobFromImage(frame, blob, 1/255.F, cv::Size(inpWidth, inpHeight), cv::Scalar(), true, false);
         // net.setInput(blob);
@@ -159,9 +167,10 @@ int main(){
         
         cv::imshow(kWinName, frame);
         cv::waitKey(0);
+        */
 
     };
-    cv::destroyAllWindows();
+    // cv::destroyAllWindows();
 
 
     return 0;

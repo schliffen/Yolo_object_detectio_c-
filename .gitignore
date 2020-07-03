@@ -1,3 +1,9 @@
 *.mp4
 *.weights
 *.zip
+*.params
+*.so
+*.json
+*.data
+
+

@@ -6,5 +6,5 @@ CXX_FLAGS =  -std=c++14 -ldl -fPIC
 
 CXX_DEFINES = -Dnmslib_EXPORTS
 
-CXX_INCLUDES = -I/home/ali/ProjLAB/yoloTvm/cpp/Yolo_object_detectio_c-/include -I/home/ali/ProjLAB/yoloTvm/cpp/Yolo_object_detectio_c-/weights -I/home/ali/installation/opencv4/include/opencv4 
+CXX_INCLUDES = -I/home/ali/ProjLAB/yoloTvm/cpp/Yolo_object_detectio_c-/include -I/home/ali/ProjLAB/yoloTvm/cpp/Yolo_object_detectio_c-/weights -I/home/ali/installation/tvm/include -I/home/ali/installation/tvm/3rdparty/dlpack/include -I/home/ali/installation/tvm/3rdparty/dlmc-core/include -I/home/ali/installation/opencv4/include/opencv4 
 

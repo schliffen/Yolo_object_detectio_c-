@@ -18,6 +18,9 @@ set(CMAKE_TARGET_DEFINITIONS_CXX
 set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "../include"
   "../weights"
+  "/home/ali/installation/tvm/include"
+  "/home/ali/installation/tvm/3rdparty/dlpack/include"
+  "/home/ali/installation/tvm/3rdparty/dlmc-core/include"
   "/home/ali/installation/opencv4/include/opencv4"
   )
 
