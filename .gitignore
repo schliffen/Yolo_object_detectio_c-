@@ -2,7 +2,7 @@
 *.weights
 *.zip
 *.params
-*.so
+#*.so
 *.json
 *.data
 
